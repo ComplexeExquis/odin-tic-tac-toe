@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "inter-regular";
+    src: url(./assets/fonts/Inter-Regular.ttf);
+}
+@font-face {
+    font-family: "permanent-marker-regular";
+    src: url(./assets/fonts/PermanentMarker-Regular.ttf);
+}
+
+body {
+    font-family: "inter-regular", sans-serif;
+}
