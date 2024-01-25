@@ -129,7 +129,21 @@ button {
     margin-top: 32px;
 }
 
-
+#end-screen > dialog {
+    margin-top: 144px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #cecece;
+    border: 1px solid #4E4A3B;
+    padding: 40px 20px;
+}
+#end-screen > dialog > h3 {
+    font-size: 2rem;
+}
+#menu-btn {
+    margin-top: 16px;
+}
 
 /* temp */
 #start-screen,
