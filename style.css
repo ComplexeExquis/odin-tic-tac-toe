@@ -84,11 +84,56 @@ button {
     margin-top: 80px;
 }
 
-
+#grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    margin-top: 48px;
+}
+.grid-item {
+    width: 88px;
+    height: 88px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#gi0 {
+    border-right: 1px solid #4E4A3B;
+    border-bottom: 1px solid #4E4A3B;
+}
+#gi1 {
+    border-bottom: 1px solid #4E4A3B;
+}
+#gi2 {
+    border-left: 1px solid #4E4A3B;
+    border-bottom: 1px solid #4E4A3B;
+}
+#gi3 {
+    border-right: 1px solid #4E4A3B;
+}
+#gi5 {
+    border-left: 1px solid #4E4A3B;
+}
+#gi6 {
+    border-top: 1px solid #4E4A3B;
+    border-right: 1px solid #4E4A3B;
+}
+#gi7 {
+    border-top: 1px solid #4E4A3B;
+}
+#gi8 {
+    border-left: 1px solid #4E4A3B;
+    border-top: 1px solid #4E4A3B;
+}
+#restart-btn {
+    margin-top: 32px;
+}
 
 
 
 /* temp */
-#start-screen {
+#start-screen,
+#pickname-screen,
+#playing-screen {
     display: none;
 }
