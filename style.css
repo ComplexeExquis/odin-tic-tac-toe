@@ -7,6 +7,88 @@
     src: url(./assets/fonts/PermanentMarker-Regular.ttf);
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+    font-weight: 400;
+}
+
 body {
     font-family: "inter-regular", sans-serif;
+}
+
+#outer-container {
+    display: grid;
+    grid-template-rows: 1fr 9fr;
+}
+
+header {
+    background-color: #4E4A3B;
+    color: #cecece;
+    font-size: 1.5rem;
+    padding: 18px 0px 18px 12px;
+}
+
+.screen {
+    background-color: #cecece;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button {
+    border: none;
+    background-color: #4E4A3B;
+    color: #cecece;
+    font-size: 1.5rem;
+    padding: 1rem 0;
+    min-width: 200px;
+    text-align: center;
+}
+
+.screen-title {
+    margin-top: 54px;
+}
+#start-screen > button {
+    min-width: 240px;
+}
+#pvp-btn,
+#p1-name {
+    margin-top: 40px;
+}
+#pve-btn,
+#p2-name {
+    margin-top: 32px;
+}
+
+.p-name-input {
+    background-color: #cecece;
+    border: 1px solid #4E4A3B;
+    box-shadow: 2px 2px 2px 0px rgba(78, 74, 59, 0.50);
+    min-height: 56px;
+    max-width: 240px;
+    font-size: 1.5rem;
+    padding-left: 16px;
+}
+.p-name-input::placeholder {
+    opacity: 1;
+    color: #4E4A3B;
+    font-size: 1.5rem;
+}
+#start-game-btn {
+    margin-top: 80px;
+}
+
+
+
+
+
+/* temp */
+#start-screen {
+    display: none;
 }
