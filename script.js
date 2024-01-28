@@ -30,12 +30,10 @@ const createPlayer = (order, type, name) => {
 const createDisplayManager = () => {
     // html dom stuff
     // functionality to refresh and display change
-    
-    // start
-    // pickname
-    // playing
-    // end
-    let screenState = "start";
+    const startScreen = document.getElementById("start-screen-container");
+    const picknameScreen = document.getElementById("pickname-screen-container");
+    const playingScreen = document.getElementById("playing-screen-container");
+    const endScreen = document.getElementById("end-screen-container"); 
     
     // temporary print
     const showGrid = (gameboard) => {
@@ -45,25 +43,60 @@ const createDisplayManager = () => {
         console.log("\n-------------------------\n");
     };
 
-    const changeScreenTitle = () => {
+    const disableAllScreen = () => {
+        startScreen.style.display = "none";     
+        picknameScreen.style.display = "none";  
+        playingScreen.style.display = "none";  
+        endScreen.style.display = "none";  
+    };
+       
+
+
+    const changeScreenTitle = (screenState, currentPlayer) => {
         const screenTitle = document.getElementById("screen-title");
 
         switch (screenState) {
             case "pickname":
-                screenTitle.value = "Enter name";
+                screenTitle.textContent = "Enter name";
                 break;
             case "playing":
-                screenTitle.value = "Player 1 turn";
+                screenTitle.textContent = `${currentPlayer.playerName} turn`;
+                break;
+            case "end":
+                screenTitle.textContent = `Game ends`;
                 break;
             default:
-                screenTitle.value = "Pick mode";
+                screenTitle.textContent = "Pick mode";
                 break;
         }
-    }
+    };
+
+    const changeScreen = (screenState, currentPlayer) => {
+        disableAllScreen();
+
+        switch (screenState) {
+            case "pickname":
+                picknameScreen.style.display = "flex";
+                break;
+            case "playing":
+                playingScreen.style.display = "flex";  
+                break;
+            case "end":
+                endScreen.style.display = "flex";
+                break;
+            default:
+                startScreen.style.display = "flex";
+                break;
+        }
+
+        changeScreenTitle(screenState, currentPlayer);
+        
+    };
+
 
     
 
-    return {showGrid};
+    return {showGrid, changeScreen};
 };
 
 const Game = (() => {
@@ -74,6 +107,12 @@ const Game = (() => {
 
     let currentTurn = "p1";
     let win = false;
+
+    // start
+    // pickname
+    // playing
+    // end
+    let screenState = "start";
 
     const startRound = () => {
         let i = 0;
@@ -135,5 +174,5 @@ const Game = (() => {
         }
     };
 
-    return {gameboard, displayManager, startRound};
+    return {gameboard, displayManager, startRound, getCurrentPlayer};
 })();

@@ -98,7 +98,7 @@ button {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
-    margin-top: 48px;
+    margin-top: 40px;
 }
 .grid-item {
     width: 88px;
@@ -140,7 +140,7 @@ button {
 }
 
 #end-screen-container > dialog {
-    margin-top: 64px;
+    margin-top: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -148,9 +148,16 @@ button {
     border: 1px solid #4E4A3B;
     padding: 40px 20px;
 }
-#end-screen > dialog > h3 {
+#end-screen-container > dialog > h3 {
     font-size: 2rem;
 }
 #menu-btn {
     margin-top: 16px;
+}
+
+#start-screen-container,
+#pickname-screen-container,
+#playing-screen-container,
+#end-screen-container {
+    display: none;
 }
