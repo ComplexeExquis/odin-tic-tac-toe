@@ -35,13 +35,49 @@ const createDisplayManager = () => {
     const playingScreen = document.getElementById("playing-screen-container");
     const endScreen = document.getElementById("end-screen-container"); 
     
-    // temporary print
-    const showGrid = (gameboard) => {
-        for (let index = 0; index < gameboard.length; index += 3) 
-            console.log(`${gameboard[index]} `, `${gameboard[index + 1]} `, `${gameboard[index + 2]}`);
+    // initiate all event listeners and attaching it 
+    (function initiateStartScreen() {
+        // pvp button
+        startScreen.children[0].addEventListener("click", () => {
+            changeScreen("pickname");
+        });
+        // pve button
+        startScreen.children[1].addEventListener("click", () => {
+            changeScreen("pickname-pve");
+        });
+    })();
+    (function initiatePicknameScreen() {
+        picknameScreen.children[2].addEventListener("click", () => {
+            // get player(s) name from form
+            // initiate players object
+            // change screen state
+            changeScreen("playing", Game.getCurrentPlayer());
 
-        console.log("\n-------------------------\n");
-    };
+        });
+    })();
+    (function initiatePlayingScreen() {
+        playingScreen.children[0].addEventListener("click", () => {
+            changeScreen("end");
+        });
+
+        playingScreen.children[1].addEventListener("click", () => {
+            // do reset on grid, player turn
+            // reset()
+            changeScreen("playing", Game.getCurrentPlayer());
+        });
+    })();
+    (function initiateEndScreen() {
+        const target = endScreen.children[0];
+        target.children[1].addEventListener("click", () => {
+            // do reset on grid, player turn
+            // reset()
+            changeScreen("playing", Game.getCurrentPlayer());
+        });
+
+        target.children[2].addEventListener("click", () => {
+            changeScreen("start");
+        });
+    })();
 
     const disableAllScreen = () => {
         startScreen.style.display = "none";     
@@ -50,12 +86,11 @@ const createDisplayManager = () => {
         endScreen.style.display = "none";  
     };
        
-
-
     const changeScreenTitle = (screenState, currentPlayer) => {
         const screenTitle = document.getElementById("screen-title");
 
         switch (screenState) {
+            case "pickname-pve":
             case "pickname":
                 screenTitle.textContent = "Enter name";
                 break;
@@ -71,10 +106,20 @@ const createDisplayManager = () => {
         }
     };
 
-    const changeScreen = (screenState, currentPlayer) => {
+    const changeScreenPve = () => {
+        picknameScreen.children[1].style.display = "none";
+    };
+
+    const refreshPicknameSreen = () => {
+        picknameScreen.children[1].style.display = "inline-block";
+    };
+
+    const changeScreen = (screenState, currentPlayer = "") => {
         disableAllScreen();
 
         switch (screenState) {
+            case "pickname-pve":
+                changeScreenPve();
             case "pickname":
                 picknameScreen.style.display = "flex";
                 break;
@@ -85,18 +130,16 @@ const createDisplayManager = () => {
                 endScreen.style.display = "flex";
                 break;
             default:
+                refreshPicknameSreen();
                 startScreen.style.display = "flex";
                 break;
         }
-
         changeScreenTitle(screenState, currentPlayer);
-        
     };
-
 
     
 
-    return {showGrid, changeScreen};
+    return {changeScreen};
 };
 
 const Game = (() => {
@@ -107,30 +150,6 @@ const Game = (() => {
 
     let currentTurn = "p1";
     let win = false;
-
-    // start
-    // pickname
-    // playing
-    // end
-    let screenState = "start";
-
-    const startRound = () => {
-        let i = 0;
-        while (i < 10) {
-            displayManager.showGrid(gameboard.getGameboardCopy());
-            // 1. get user input
-            const pos = prompt(`${currentTurn} move: `)
-            // 2. update board 
-            gameboard.markGameboard(getCurrentPlayer(), pos);
-            displayManager.showGrid(gameboard.getGameboardCopy());
-            // evaluateRound
-            evaluateRound();
-            // repeat again untill someone wins
-            switchTurn();
-            
-            i++;
-        }
-    }
 
     const getCurrentPlayer = () => (currentTurn === "p1") ? playerOne : playerTwo;
     
@@ -174,5 +193,5 @@ const Game = (() => {
         }
     };
 
-    return {gameboard, displayManager, startRound, getCurrentPlayer};
+    return {gameboard, displayManager, getCurrentPlayer};
 })();
