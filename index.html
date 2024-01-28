@@ -9,46 +9,47 @@
 </head>
 <body>
     <div id="outer-container">
+
         <header>Tic tac toe</header>
 
         <div id="start-screen" class="screen">
-            <h2 class="screen-title">Pick mode</h2>
-            <button id="pvp-btn">Player VS Player</button>
-            <button id="pve-btn">Player VS AI</button>
-        </div>
-
-        <div id="pickname-screen" class="screen">
-            <h2 class="screen-title">Enter name</h2>
-            <input type="text" name="p1-name" id="p1-name" class="p-name-input" placeholder="Player 1....">
-            <input type="text" name="p2-name" id="p2-name" class="p-name-input" placeholder="Player 2....">
-            <button id="start-game-btn">Start</button>
-        </div>
-
-        <div id="playing-screen" class="screen">
-            <h2 class="screen-title">Player x turn</h2>
-            <div id="grid">
-                <div id="gi0" class="grid-item">0</div>
-                <div id="gi1" class="grid-item">1</div>
-                <div id="gi2" class="grid-item">2</div>
-                <div id="gi3" class="grid-item">3</div>
-                <div id="gi4" class="grid-item">4</div>
-                <div id="gi5" class="grid-item">5</div>
-                <div id="gi6" class="grid-item">6</div>
-                <div id="gi7" class="grid-item">7</div>
-                <div id="gi8" class="grid-item">8</div>
-            </div>
-            <button id="restart-btn">Restart</button>
-        </div>
-
-        <div id="end-screen" class="screen">
-            <h2 class="screen-title">Player x turn</h2>
+            <h2 id="screen-title">Pick mode</h2>
             
-            <dialog open>
-                <h3>Player x win</h3>
+            <!-- <div id="start-screen-container" class="inner-container">
+                <button id="pvp-btn">Player VS Player</button>
+                <button id="pve-btn">Player VS AI</button>
+            </div> -->
+
+            <!-- <div id="pickname-screen-container" class="inner-container">
+                <input type="text" name="p1-name" id="p1-name" class="p-name-input" placeholder="Player 1....">
+                <input type="text" name="p2-name" id="p2-name" class="p-name-input" placeholder="Player 2....">
+                <button id="start-game-btn">Start</button>
+            </div> -->
+
+            <!-- <div id="playing-screen-container" class="inner-container">
+                <div id="grid">
+                    <div id="gi0" class="grid-item">0</div>
+                    <div id="gi1" class="grid-item">1</div>
+                    <div id="gi2" class="grid-item">2</div>
+                    <div id="gi3" class="grid-item">3</div>
+                    <div id="gi4" class="grid-item">4</div>
+                    <div id="gi5" class="grid-item">5</div>
+                    <div id="gi6" class="grid-item">6</div>
+                    <div id="gi7" class="grid-item">7</div>
+                    <div id="gi8" class="grid-item">8</div>
+                </div>
                 <button id="restart-btn">Restart</button>
-                <button id="menu-btn">Menu</button>
-            </dialog>
+            </div> -->
+
+            <div id="end-screen-container" class="inner-container">
+                <dialog open>
+                    <h3>Player x win</h3>
+                    <button id="restart-btn">Restart</button>
+                    <button id="menu-btn">Menu</button>
+                </dialog>
+            </div> 
         </div>
+
     </div>
 
     <script src="script.js"></script>

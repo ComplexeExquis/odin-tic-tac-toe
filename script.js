@@ -27,7 +27,6 @@ const createPlayer = (order, type, name) => {
 };
 
 
-
 const createDisplayManager = () => {
     // html dom stuff
     // functionality to refresh and display change
@@ -45,6 +44,24 @@ const createDisplayManager = () => {
 
         console.log("\n-------------------------\n");
     };
+
+    const changeScreenTitle = () => {
+        const screenTitle = document.getElementById("screen-title");
+
+        switch (screenState) {
+            case "pickname":
+                screenTitle.value = "Enter name";
+                break;
+            case "playing":
+                screenTitle.value = "Player 1 turn";
+                break;
+            default:
+                screenTitle.value = "Pick mode";
+                break;
+        }
+    }
+
+    
 
     return {showGrid};
 };
@@ -105,7 +122,7 @@ const Game = (() => {
             const winningCondition = winningConditions[i];
 
             for (let j = 0; j < winningCondition.length; j++) {
-                console.log(gameboard.getGameboardCopy()[winningCondition[j]]);
+                
                 if (gameboard.getGameboardCopy()[winningCondition[j]] !== getCurrentPlayer().marker) 
                     break;
                 else
