@@ -1,9 +1,35 @@
-const createGameboard = () => {
+const createPlayer = (name, type, order) => {
+    const pName = name;
+    const pType = type;
+    const pOrder = order;
+
+    let botLogic;
+
+    if (type === "bot") 
+        botLogic = createBotLogic();
+    else
+        botLogic = "empty";
+
+    const result = {
+        pName, 
+        pType, 
+        pOrder,
+        botLogic
+    };
+
+    return result; 
+};
+
+const createBotLogic = () => {
+
+};
+
+const createBoard = () => {
     const gameboard = ["0", "1", "2",
                        "3", "4", "5",
                        "6", "7", "8"];
 
-    const markGameboard = (player, position) => {
+    const markBoard = (player, position) => {
         const marker = player.marker;
         gameboard[position] = marker;
     } 
@@ -12,26 +38,18 @@ const createGameboard = () => {
         return [...gameboard];
     }
 
-    return {markGameboard, getGameboardCopy};
+    return {markBoard, getGameboardCopy};
 };
 
-const createPlayer = (order, type, name) => {
-    // "human" or "bot"
-    const playerType = type;
-
-    const playerName = name;
-    
-    const marker = (order === "p1") ? "X" : "O";
-    
-    return {playerType, playerName, marker};
-};
-
-const createBotHandler = () => {
-    // bot algorithms
-};
-
-const createDisplayManager = () => {
-    // html dom stuff
+const createDisplayManager = (
+    startGameFn, 
+    initPlayerFn, 
+    getcurrentTurnFn,
+    getCurrentPlayerFn, 
+    setIsHumanVsBotFn,
+    isGameOverFn
+    ) => {
+     // html dom stuff
     // functionality to refresh and display change
     const startScreen = document.getElementById("start-screen-container");
     const picknameScreen = document.getElementById("pickname-screen-container");
@@ -44,9 +62,11 @@ const createDisplayManager = () => {
         startScreen.children[0].addEventListener("click", () => {
             changeScreen("pickname");
         });
+
         // pve button
         startScreen.children[1].addEventListener("click", () => {
             changeScreen("picknamePve");
+            setIsHumanVsBotFn(true);
         });
     })();
     (function initiatePicknameScreen() {
@@ -54,38 +74,62 @@ const createDisplayManager = () => {
             // get player(s) name from form
             const pOneName = picknameScreen.children[0].value;
             const pTwoName = picknameScreen.children[1].value;
+            
             // initiate players object
-            Game.initiatePlayers(pOneName, pTwoName);
+            initPlayerFn(pOneName, pTwoName);
+            
             // reset form value
             picknameScreen.children[0].value = "";
             picknameScreen.children[1].value = "";
-            // change screen state
-            changeScreen("playing", Game.getCurrentPlayer());
+            
+            // start the game
+            startGameFn();
 
+            // change screen state
+            changeScreen("playing", getCurrentPlayerFn());
         });
     })();
     (function initiatePlayingScreen() {
+        // grid event listener
+        const gridItems =  playingScreen.children[0].children;
+        for (const i of gridItems) {
+            gridItems[i].addEventListener("click", () => {
+                
+            });
+        }
+        
+        // it should be adding event listenenr on each grid item
         playingScreen.children[0].addEventListener("click", () => {
+            
+
             changeScreen("end");
+            
         });
 
+        // restart button
         playingScreen.children[1].addEventListener("click", () => {
             // do reset on grid, player turn
             // reset()
-            changeScreen("playing", Game.getCurrentPlayer());
+            changeScreen("playing", getCurrentPlayerFn());
+            
         });
     })();
     (function initiateEndScreen() {
         const target = endScreen.children[0];
+
+        // restart button
         target.children[1].addEventListener("click", () => {
             // do reset on grid, player turn
             // reset()
-            changeScreen("playing", Game.getCurrentPlayer());
+            changeScreen("playing", getCurrentPlayerFn());
+            
         });
 
+        // menu button
         target.children[2].addEventListener("click", () => {
             // back to menu, full reset
             changeScreen("start");
+            setIsHumanVsBotFn(false);
         });
     })();
 
@@ -105,7 +149,7 @@ const createDisplayManager = () => {
                 screenTitle.textContent = "Enter name";
                 break;
             case "playing":
-                screenTitle.textContent = `${currentPlayer.playerName} turn`;
+                screenTitle.textContent = `${currentPlayer.pName} turn`;
                 break;
             case "end":
                 screenTitle.textContent = `Game ends`;
@@ -146,37 +190,63 @@ const createDisplayManager = () => {
         }
         changeScreenTitle(screenState, currentPlayer);
     };
-
-    
-
-    return {changeScreen};
 };
 
-const Game = (() => {
-    const gameboard = createGameboard();
-    const displayManager = createDisplayManager();
-    const players = [];
-
-    let currentTurn = "p1";
-    let win = false;
-
-    const getCurrentPlayer = () => (currentTurn === "p1") ? players[0] : players[1];
+const game = (() => {
+    const displayManager = createDisplayManager(
+        startGame, 
+        initiatePlayers,
+        getcurrentTurn,
+        getCurrentPlayer,
+        setIsHumanVsBot,
+        getIsGameOver
+    );
+    const board = createBoard();
+    let playerOne, playerTwo;
+    let currentTurn;
+    let isHumanVsBot;
+    let isGameOver;
     
-    const switchTurn = () => currentTurn = (currentTurn === "p1") ? "p2" : "p1";
+    function startGame () {
+        currentTurn = "p1";
+        isGameOver = false;
 
-    const initiatePlayers = (pOneName, pTwoName) => {
-        players.push(createPlayer("p1", "human", pOneName));
         
-        // if not fighting againts bot, init player 2 as human
-        if (pTwoName !== "") 
-            players.push(createPlayer("p2", "human", pTwoName));
+
+        // game logic
+        // ...
+    }
+
+    function initiatePlayers(pOneName, pTwoName) {
+        playerOne = createPlayer(pOneName, "human", "p1");
+
+        if (isHumanVsBot === true) 
+            playerTwo = createPlayer(pTwoName, "bot", "p2");
         else 
-            players.push(createPlayer("p2", "bot", pTwoName));
-    };
+            playerTwo = createPlayer(pTwoName, "human", "p2");
+
+        
+    }
+
+    function setIsHumanVsBot(newIsHumanVsBot) {
+        isHumanVsBot = newIsHumanVsBot;
+    }
+
+    function getcurrentTurn() {
+        return currentTurn;
+    }
+
+    function getCurrentPlayer () {
+        return (currentTurn === "p1") ? playerOne : playerTwo; 
+    }
+
+    function getIsGameOver() {
+        return isGameOver;
+    }
 
     const evaluateRound = () => {
         // if win skip this function
-        if (win) 
+        if (isGameOver) 
             return;
         
         // manually checks every winning condition
@@ -189,38 +259,21 @@ const Game = (() => {
                                   [2, 5, 8],
                                   [0, 4, 8],
                                   [2, 4, 6]];
-        // cancer
         
         for (let i = 0; i < winningConditions.length; i++) {
-            if (win) 
+            if (isGameOver) 
                 break;
             
             const winningCondition = winningConditions[i];
-
             for (let j = 0; j < winningCondition.length; j++) {
                 
                 if (gameboard.getGameboardCopy()[winningCondition[j]] !== getCurrentPlayer().marker) 
                     break;
                 else
                     if (j === 2) 
-                        win = true;
+                        isGameOver = true;
             }
-        }
-        if (win) {
-            console.log(`${getCurrentPlayer().playerName} wins`);   
         }
     };
 
-    const startGame = () => {
-        if (win) 
-            return;
-        
-
-
-        
-    }
-
-    // const reset
-
-    return {gameboard, displayManager, getCurrentPlayer, initiatePlayers};
 })();
