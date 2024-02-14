@@ -110,10 +110,21 @@ button:hover{
     justify-content: center;
     align-items: center;
     transition: background-color 0.5s;
+    font-family: "permanent-marker-regular";
+    font-size: 4rem;
 }
 .grid-item:hover {
     cursor: pointer;
-    background-color: black;
+    background-color: #4d4d4d;
+}
+.disabled {
+    pointer-events: none;
+}
+.marked-p1 {
+    color: #D83021;
+}
+.marked-p2 {
+    color: #21C9D8;
 }
 #gi0 {
     border-right: 1px solid #4E4A3B;

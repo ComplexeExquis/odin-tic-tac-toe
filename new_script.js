@@ -3,6 +3,8 @@ const createPlayer = (name, type, order) => {
     const pType = type;
     const pOrder = order;
 
+    const marker = (order === "p1") ? "X" : "O";
+
     let botLogic;
 
     if (type === "bot") 
@@ -14,7 +16,8 @@ const createPlayer = (name, type, order) => {
         pName, 
         pType, 
         pOrder,
-        botLogic
+        botLogic,
+        marker
     };
 
     return result; 
@@ -25,29 +28,40 @@ const createBotLogic = () => {
 };
 
 const createBoard = () => {
-    const gameboard = ["0", "1", "2",
+    let gameboard = ["0", "1", "2",
                        "3", "4", "5",
                        "6", "7", "8"];
 
     const markBoard = (player, position) => {
         const marker = player.marker;
         gameboard[position] = marker;
-    } 
+    }; 
 
     const getGameboardCopy = () => {
         return [...gameboard];
-    }
+    };
 
-    return {markBoard, getGameboardCopy};
+    const resetBoard = () => {
+        gameboard = ["0", "1", "2",
+                     "3", "4", "5",
+                     "6", "7", "8"];
+    };
+
+    return {markBoard, getGameboardCopy, resetBoard};
 };
 
 const createDisplayManager = (
-    startGameFn, 
-    initPlayerFn, 
-    getcurrentTurnFn,
-    getCurrentPlayerFn, 
-    setIsHumanVsBotFn,
-    isGameOverFn
+    startGame, 
+    initPlayer, 
+    resetTurn,
+    getCurrentPlayer, 
+    setIsHumanVsBot,
+    isGameOver,
+    markBoard,
+    switchTurn,
+    evaluateRound,
+    resetBoard,
+    resetIsGameOver
     ) => {
      // html dom stuff
     // functionality to refresh and display change
@@ -66,7 +80,7 @@ const createDisplayManager = (
         // pve button
         startScreen.children[1].addEventListener("click", () => {
             changeScreen("picknamePve");
-            setIsHumanVsBotFn(true);
+            setIsHumanVsBot(true);
         });
     })();
     (function initiatePicknameScreen() {
@@ -76,42 +90,56 @@ const createDisplayManager = (
             const pTwoName = picknameScreen.children[1].value;
             
             // initiate players object
-            initPlayerFn(pOneName, pTwoName);
+            initPlayer(pOneName, pTwoName);
             
             // reset form value
             picknameScreen.children[0].value = "";
             picknameScreen.children[1].value = "";
             
             // start the game
-            startGameFn();
+            startGame();
 
             // change screen state
-            changeScreen("playing", getCurrentPlayerFn());
+            changeScreen("playing", getCurrentPlayer());
         });
     })();
     (function initiatePlayingScreen() {
         // grid event listener
         const gridItems =  playingScreen.children[0].children;
-        for (const i of gridItems) {
-            gridItems[i].addEventListener("click", () => {
-                
+        for (const gridItem of gridItems) {
+            gridItem.addEventListener("click", (e) => {
+                // if game is over, nothing happens when clicking
+                if (isGameOver()) 
+                    return;
+                // get data item
+                const position = e.target.dataset.pos;
+                // mark the grid cell
+                markBoard(getCurrentPlayer(), position);
+                if (getCurrentPlayer().pOrder === "p1") 
+                    e.target.classList.add("marked-p1")
+                else  
+                    e.target.classList.add("marked-p2")
+                // disable marking the marked cell
+                e.target.classList.add("disabled");
+                // put mark inside corresponding cell
+                e.target.innerText = getCurrentPlayer().marker;
+                // evaluate turn, is game over or not
+                if(evaluateRound()){
+                    changeScreen("end", getCurrentPlayer())
+                    return;
+                }
+                // switch turn
+                switchTurn();
+                // change the title screen
+                changeScreenTitle("playing", getCurrentPlayer());
             });
         }
-        
-        // it should be adding event listenenr on each grid item
-        playingScreen.children[0].addEventListener("click", () => {
-            
-
-            changeScreen("end");
-            
-        });
 
         // restart button
         playingScreen.children[1].addEventListener("click", () => {
             // do reset on grid, player turn
-            // reset()
-            changeScreen("playing", getCurrentPlayerFn());
-            
+            reset();
+            changeScreen("playing", getCurrentPlayer());
         });
     })();
     (function initiateEndScreen() {
@@ -120,27 +148,27 @@ const createDisplayManager = (
         // restart button
         target.children[1].addEventListener("click", () => {
             // do reset on grid, player turn
-            // reset()
-            changeScreen("playing", getCurrentPlayerFn());
-            
+            reset();
+            changeScreen("playing", getCurrentPlayer());
         });
 
         // menu button
         target.children[2].addEventListener("click", () => {
             // back to menu, full reset
+            reset();
             changeScreen("start");
-            setIsHumanVsBotFn(false);
+            setIsHumanVsBot(false);
         });
     })();
 
-    const disableAllScreen = () => {
+    function disableAllScreen() {
         startScreen.style.display = "none";     
         picknameScreen.style.display = "none";  
         playingScreen.style.display = "none";  
         endScreen.style.display = "none";  
     };
        
-    const changeScreenTitle = (screenState, currentPlayer) => {
+    function changeScreenTitle(screenState, currentPlayer) {
         const screenTitle = document.getElementById("screen-title");
 
         switch (screenState) {
@@ -149,10 +177,12 @@ const createDisplayManager = (
                 screenTitle.textContent = "Enter name";
                 break;
             case "playing":
-                screenTitle.textContent = `${currentPlayer.pName} turn`;
+                screenTitle.textContent = `${currentPlayer.pName} turn (${currentPlayer.marker})`;
                 break;
             case "end":
                 screenTitle.textContent = `Game ends`;
+                document.getElementById("dialog-title")
+                    .innerText = `${currentPlayer.pName} (${currentPlayer.marker}) wins`;
                 break;
             default:
                 screenTitle.textContent = "Pick mode";
@@ -168,7 +198,7 @@ const createDisplayManager = (
         picknameScreen.children[1].style.display = "inline-block";
     };
 
-    const changeScreen = (screenState, currentPlayer = "") => {
+    function changeScreen(screenState, currentPlayer = "") {
         disableAllScreen();
 
         switch (screenState) {
@@ -189,19 +219,41 @@ const createDisplayManager = (
                 break;
         }
         changeScreenTitle(screenState, currentPlayer);
-    };
+    }
+
+    function resetBoardVisually() {
+        const gridItems = document.querySelectorAll(".grid-item");
+        for (const gridItem of gridItems) {
+            gridItem.innerText = "";
+            gridItem.classList.remove("disabled");  
+            gridItem.classList.remove("marked-p1");
+            gridItem.classList.remove("marked-p2");        
+        }
+    }
+
+    function reset() {
+        resetBoard();
+        resetBoardVisually();
+        resetTurn();
+        resetIsGameOver();
+    }
 };
 
 const game = (() => {
+    const board = createBoard();
     const displayManager = createDisplayManager(
         startGame, 
         initiatePlayers,
-        getcurrentTurn,
+        resetTurn,
         getCurrentPlayer,
         setIsHumanVsBot,
-        getIsGameOver
+        getIsGameOver,
+        board.markBoard,
+        switchTurn,
+        evaluateRound,
+        board.resetBoard,
+        resetIsGameOver
     );
-    const board = createBoard();
     let playerOne, playerTwo;
     let currentTurn;
     let isHumanVsBot;
@@ -221,7 +273,7 @@ const game = (() => {
         playerOne = createPlayer(pOneName, "human", "p1");
 
         if (isHumanVsBot === true) 
-            playerTwo = createPlayer(pTwoName, "bot", "p2");
+            playerTwo = createPlayer("bot", "bot", "p2");
         else 
             playerTwo = createPlayer(pTwoName, "human", "p2");
 
@@ -232,8 +284,16 @@ const game = (() => {
         isHumanVsBot = newIsHumanVsBot;
     }
 
-    function getcurrentTurn() {
-        return currentTurn;
+    function resetTurn() {
+        currentTurn = "p1";
+    }
+
+    function resetIsGameOver() {
+        isGameOver = false;
+    }
+
+    function switchTurn() {
+        currentTurn = (currentTurn === "p1") ? "p2" : "p1";
     }
 
     function getCurrentPlayer () {
@@ -244,11 +304,7 @@ const game = (() => {
         return isGameOver;
     }
 
-    const evaluateRound = () => {
-        // if win skip this function
-        if (isGameOver) 
-            return;
-        
+    function evaluateRound() {
         // manually checks every winning condition
         // cause it's only 3x3 board
         const winningConditions = [[0, 1, 2],
@@ -267,13 +323,17 @@ const game = (() => {
             const winningCondition = winningConditions[i];
             for (let j = 0; j < winningCondition.length; j++) {
                 
-                if (gameboard.getGameboardCopy()[winningCondition[j]] !== getCurrentPlayer().marker) 
+                if (board.getGameboardCopy()[winningCondition[j]] !== getCurrentPlayer().marker) 
                     break;
                 else
-                    if (j === 2) 
+                    if (j === 2) {
+                        // the game ends, someone win
                         isGameOver = true;
+                        return true;
+                    }
             }
         }
-    };
+        return false;
+    }
 
 })();
