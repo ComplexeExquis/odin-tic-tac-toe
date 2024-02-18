@@ -56,6 +56,7 @@ button:hover{
 
 #screen-title {
     margin-top: 54px;
+    text-align: center;
 }
 #start-screen-container,
 #pickname-screen-container,
@@ -177,6 +178,6 @@ button:hover{
 /* #start-screen-container, */
 #pickname-screen-container,
 #playing-screen-container,
-#end-screen-container {
+#end-screen-container { /* start screen should not be display none  */
     display: none;
 }

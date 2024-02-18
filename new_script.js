@@ -29,8 +29,8 @@ const createBotLogic = () => {
 
 const createBoard = () => {
     let gameboard = ["0", "1", "2",
-                       "3", "4", "5",
-                       "6", "7", "8"];
+                     "3", "4", "5",
+                     "6", "7", "8"];
 
     const markBoard = (player, position) => {
         const marker = player.marker;
@@ -47,7 +47,29 @@ const createBoard = () => {
                      "6", "7", "8"];
     };
 
-    return {markBoard, getGameboardCopy, resetBoard};
+    // this one is buggy
+    const isFullyMarked = () => {
+        for (const element of gameboard) {
+            console.log(element);
+            if(Number.isInteger(parseInt(element))){ // found a number, means that board is not fully marked
+                console.log("break");
+                return false;
+            } 
+            else { // "X" or "O" continue looping
+                console.log("continue");
+                continue;
+            }
+                
+        }
+        console.log("fully marked");
+        // if succesfully iterate all array elements, means that all of it is "X" or "O"
+        return true;
+    }
+
+    return {markBoard, 
+            getGameboardCopy, 
+            resetBoard, 
+            isFullyMarked};
 };
 
 const createDisplayManager = (
@@ -61,7 +83,10 @@ const createDisplayManager = (
     switchTurn,
     evaluateRound,
     resetBoard,
-    resetIsGameOver
+    resetIsGameOver,
+    resetIsTie,
+    getIsTie,
+    isFullyMarked
     ) => {
      // html dom stuff
     // functionality to refresh and display change
@@ -129,7 +154,7 @@ const createDisplayManager = (
                     return;
                 }
                 // switch turn
-                switchTurn();
+                switchTurn();    
                 // change the title screen
                 changeScreenTitle("playing", getCurrentPlayer());
             });
@@ -170,6 +195,11 @@ const createDisplayManager = (
        
     function changeScreenTitle(screenState, currentPlayer) {
         const screenTitle = document.getElementById("screen-title");
+
+        if (getIsTie()) {
+            screenTitle.textContent = `Draw, you can restart the game`;
+            return;
+        }
 
         switch (screenState) {
             case "picknamePve":
@@ -236,6 +266,7 @@ const createDisplayManager = (
         resetBoardVisually();
         resetTurn();
         resetIsGameOver();
+        resetIsTie();
     }
 };
 
@@ -252,32 +283,36 @@ const game = (() => {
         switchTurn,
         evaluateRound,
         board.resetBoard,
-        resetIsGameOver
+        resetIsGameOver,
+        resetIsTie,
+        getIsTie,
+        board.isFullyMarked
     );
     let playerOne, playerTwo;
     let currentTurn;
     let isHumanVsBot;
     let isGameOver;
+    let isTie;
     
     function startGame () {
-        currentTurn = "p1";
-        isGameOver = false;
-
-        
-
-        // game logic
-        // ...
+        resetTurn();
+        resetIsGameOver();
+        resetIsTie();
     }
 
     function initiatePlayers(pOneName, pTwoName) {
+        // if name is empty, assign default name
+        if (pOneName === "") 
+            pOneName = "p1";
+        if(pTwoName === "" && !isHumanVsBot)
+            pTwoName = "p2";
+
         playerOne = createPlayer(pOneName, "human", "p1");
 
-        if (isHumanVsBot === true) 
+        if (isHumanVsBot) 
             playerTwo = createPlayer("bot", "bot", "p2");
         else 
             playerTwo = createPlayer(pTwoName, "human", "p2");
-
-        
     }
 
     function setIsHumanVsBot(newIsHumanVsBot) {
@@ -292,6 +327,10 @@ const game = (() => {
         isGameOver = false;
     }
 
+    function resetIsTie() {
+        isTie = false;
+    }
+
     function switchTurn() {
         currentTurn = (currentTurn === "p1") ? "p2" : "p1";
     }
@@ -304,7 +343,17 @@ const game = (() => {
         return isGameOver;
     }
 
+    function getIsTie() {
+        return isTie;
+    }
+
     function evaluateRound() {
+        // check if draw occurs
+        if (board.isFullyMarked()) {
+            isTie = true;
+            return false;
+        }
+           
         // manually checks every winning condition
         // cause it's only 3x3 board
         const winningConditions = [[0, 1, 2],
@@ -333,7 +382,6 @@ const game = (() => {
                     }
             }
         }
-        return false;
     }
 
 })();
