@@ -20,9 +20,11 @@ p {
 
 body {
     font-family: "inter-regular", sans-serif;
+    height: 100vh;
 }
 
 #outer-container {
+    height: 100%;
     display: grid;
     grid-template-rows: 1fr 9fr;
 }
@@ -184,7 +186,6 @@ button:hover{
     margin-top: 16px;
 }
 
-/* #start-screen-container, */
 #pickname-screen-container,
 #playing-screen-container,
 #end-screen-container { /* start screen should not be display none  */
