@@ -12,6 +12,8 @@ const createPlayer = (name, type, order) => {
     else
         botLogic = "empty";
 
+
+    
     const result = {
         pName, 
         pType, 
@@ -24,7 +26,15 @@ const createPlayer = (name, type, order) => {
 };
 
 const createBotLogic = () => {
+    const randomizePos = () => {
+        const pos = Math.floor(Math.random() * 10);
+        return pos;
+    }
 
+
+    return {
+        randomizePos
+    };
 };
 
 const createBoard = () => {
@@ -50,18 +60,13 @@ const createBoard = () => {
     // this one is buggy
     const isFullyMarked = () => {
         for (const element of gameboard) {
-            console.log(element);
-            if(Number.isInteger(parseInt(element))){ // found a number, means that board is not fully marked
-                console.log("break");
+            if(Number.isInteger(parseInt(element)))
+                // found a number, means that board is not fully marked
                 return false;
-            } 
-            else { // "X" or "O" continue looping
-                console.log("continue");
-                continue;
-            }
-                
+            else 
+                // "X" or "O" continue looping
+                continue;  
         }
-        console.log("fully marked");
         // if succesfully iterate all array elements, means that all of it is "X" or "O"
         return true;
     }
@@ -86,7 +91,9 @@ const createDisplayManager = (
     resetIsGameOver,
     resetIsTie,
     getIsTie,
-    isFullyMarked
+    getIsHumanVsBot,
+    getCurrentTurn,
+    getGameboardCopy // temporary
     ) => {
      // html dom stuff
     // functionality to refresh and display change
@@ -129,6 +136,30 @@ const createDisplayManager = (
         });
     })();
     (function initiatePlayingScreen() {
+        function gridItemListener(e, position) {
+            // mark the grid cell
+            markBoard(getCurrentPlayer(), position);
+            if (getCurrentPlayer().pOrder === "p1") 
+                e.target.classList.add("marked-p1")
+            else  
+                e.target.classList.add("marked-p2")
+            // disable marking the marked cell
+            e.target.classList.add("disabled");
+            // play sound
+            document.getElementById("mark-sound").play()
+            // put mark inside corresponding cell
+            e.target.innerText = getCurrentPlayer().marker;
+            // evaluate turn, is game over or not
+            if(evaluateRound()){
+                changeScreen("end", getCurrentPlayer())
+                return;
+            }
+            // switch turn
+            switchTurn();    
+            // change the title screen
+            changeScreenTitle("playing", getCurrentPlayer());
+        }
+
         // grid event listener
         const gridItems =  playingScreen.children[0].children;
         for (const gridItem of gridItems) {
@@ -136,27 +167,29 @@ const createDisplayManager = (
                 // if game is over, nothing happens when clicking
                 if (isGameOver()) 
                     return;
+                
                 // get data item
-                const position = e.target.dataset.pos;
-                // mark the grid cell
-                markBoard(getCurrentPlayer(), position);
-                if (getCurrentPlayer().pOrder === "p1") 
-                    e.target.classList.add("marked-p1")
-                else  
-                    e.target.classList.add("marked-p2")
-                // disable marking the marked cell
-                e.target.classList.add("disabled");
-                // put mark inside corresponding cell
-                e.target.innerText = getCurrentPlayer().marker;
-                // evaluate turn, is game over or not
-                if(evaluateRound()){
-                    changeScreen("end", getCurrentPlayer())
-                    return;
+                let position;
+                position = e.target.dataset.pos; 
+                if (getIsHumanVsBot()) {
+                    // human vs bot
+                    // 1. human move
+                    gridItemListener(e, position);
+                    // 2. bot move
+                    console.log("after first turn change", getCurrentTurn());
+                    setTimeout(() => {
+                        position = getCurrentPlayer().botLogic.randomizePos();
+                        console.log("after 1 second");
+                        gridItemListener(e, position);
+                    }, 1000);
+
+                    
+                    console.log("after second turn change", getCurrentTurn());
+                    console.log(getGameboardCopy());
+                } else {
+                    // human vs human
+                    gridItemListener(e, position);
                 }
-                // switch turn
-                switchTurn();    
-                // change the title screen
-                changeScreenTitle("playing", getCurrentPlayer());
             });
         }
 
@@ -286,7 +319,9 @@ const game = (() => {
         resetIsGameOver,
         resetIsTie,
         getIsTie,
-        board.isFullyMarked
+        getIsHumanVsBot,
+        getCurrentTurn,
+        board.getGameboardCopy
     );
     let playerOne, playerTwo;
     let currentTurn;
@@ -315,8 +350,16 @@ const game = (() => {
             playerTwo = createPlayer(pTwoName, "human", "p2");
     }
 
+    function getCurrentTurn() {
+        return currentTurn;
+    }
+
     function setIsHumanVsBot(newIsHumanVsBot) {
         isHumanVsBot = newIsHumanVsBot;
+    }
+
+    function getIsHumanVsBot() {
+        return isHumanVsBot;
     }
 
     function resetTurn() {
@@ -347,13 +390,7 @@ const game = (() => {
         return isTie;
     }
 
-    function evaluateRound() {
-        // check if draw occurs
-        if (board.isFullyMarked()) {
-            isTie = true;
-            return false;
-        }
-           
+    function evaluateRound() {    
         // manually checks every winning condition
         // cause it's only 3x3 board
         const winningConditions = [[0, 1, 2],
@@ -382,6 +419,13 @@ const game = (() => {
                     }
             }
         }
+
+         // check if draw occurs
+         if (board.isFullyMarked()) {
+            isTie = true;
+            return false;
+        }
+
     }
 
 })();

@@ -32,6 +32,13 @@ header {
     color: #cecece;
     font-size: 1.5rem;
     padding: 18px 0px 18px 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#credit {
+    font-size: 0.64rem;
+    color: #cecece;
 }
 
 .screen {
@@ -49,9 +56,12 @@ button {
     padding: 1rem 0;
     min-width: 200px;
     text-align: center;
+    transition: transform 0.5s;
 }
 button:hover{
     cursor: pointer;
+    transform: scale(1.1);
+
 }
 
 #screen-title {
@@ -77,7 +87,6 @@ button:hover{
 #p2-name {
     margin-top: 32px;
 }
-
 
 .p-name-input {
     background-color: #cecece;
